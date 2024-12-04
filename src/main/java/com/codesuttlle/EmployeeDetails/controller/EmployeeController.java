@@ -2,7 +2,9 @@ package com.codesuttlle.EmployeeDetails.controller;
 
 import com.codesuttlle.EmployeeDetails.dto.EmployeeDto;
 
+import com.codesuttlle.EmployeeDetails.exception.ResourceNotFoundException;
 import com.codesuttlle.EmployeeDetails.service.EmployeeService;
+import jakarta.persistence.Id;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +27,7 @@ public class EmployeeController {
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable Long getById){
         Optional<EmployeeDto> employeeDto=employeeService.getEmployeeById(getById);
         return employeeDto.map(employeeDto1 -> ResponseEntity.ok(employeeDto1))
-                .orElseThrow(()->new NoSuchElementException("Employee Not Found"));
+                .orElseThrow(()->new ResourceNotFoundException("Employee Not Found with id: "+ getById));
     }
 
 
@@ -45,6 +47,7 @@ public class EmployeeController {
     @PutMapping(path ="/{Id}")
     public ResponseEntity<EmployeeDto> updateEmployee(@RequestBody EmployeeDto employeeDto, @PathVariable Long Id){
         return ResponseEntity.ok(employeeService.updateEmployee(Id,employeeDto));
+
     }
 
     @DeleteMapping(path = "/{Id}")

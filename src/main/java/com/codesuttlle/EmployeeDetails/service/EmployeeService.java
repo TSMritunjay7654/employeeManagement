@@ -1,6 +1,7 @@
 package com.codesuttlle.EmployeeDetails.service;
 import com.codesuttlle.EmployeeDetails.dto.EmployeeDto;
 import com.codesuttlle.EmployeeDetails.entities.EmployeeEntity;
+import com.codesuttlle.EmployeeDetails.exception.ResourceNotFoundException;
 import com.codesuttlle.EmployeeDetails.repository.EmployeeRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.util.ReflectionUtils;
@@ -40,25 +41,25 @@ public class EmployeeService {
     }
 
     public EmployeeDto updateEmployee(Long Id,EmployeeDto employeeDto) {
+        isExists(Id);
         EmployeeEntity employeeEntity=modelMapper.map(employeeDto, EmployeeEntity.class);
         employeeEntity.setId(Id);
         EmployeeEntity saveEmployeeEntity=employeeRepository.save(employeeEntity);
         return modelMapper.map(saveEmployeeEntity,EmployeeDto.class);
     }
 
-    public boolean isExists(Long Id){
-        return employeeRepository.existsById(Id);
+    public void isExists(Long Id){
+        boolean exists=employeeRepository.existsById(Id);
+         if(!exists) throw  new ResourceNotFoundException("Employee Not found with Id: "+Id);
     }
     public boolean deleteEmployeeById(Long Id) {
-        boolean exists=isExists(Id);
-        if(!exists)return false;
-        employeeRepository.deleteById(Id);
+       isExists(Id);
+       employeeRepository.deleteById(Id);
         return true;
     }
 
     public EmployeeDto updateParticularEmployeeId(Long id, Map<String, Object> updates) {
-        boolean exists=isExists(id);
-        if(!exists) return null;
+        isExists(id);
         EmployeeEntity employeeEntity=employeeRepository.findById(id).get();
         updates.forEach((filed,value)->{
             Field updatedField= ReflectionUtils.findRequiredField(EmployeeEntity.class,filed);
